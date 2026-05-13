@@ -1,179 +1,276 @@
-
+<!doctype html>
 <html>
-	<head>
-		<title>Hi!</title>
-	</head>
+<head>
+  <title>Flutterz</title>
 
-	<body>
-	
-		<audio id="youare-audio" autoplay loop hidden>
-			<source src="media/youare.mp3" type="audio/mp3">
-		</audio>
-	</body>
-<script>
-/* [Oct 2021] Added to comply with strict browser policies. */
-document.addEventListener('click', musicPlay);
+  <style>
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #fff7fb;
+    }
 
+    #status {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+      font-family: sans-serif;
+      background: white;
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
 
+    #preview {
+      width: 100vw;
+      height: 100vh;
+      object-fit: contain;
+      display: block;
+    }
+  </style>
+</head>
 
-var faudio = new Audio('https://archive.org/download/wayfarer-processed-fordemo/wayfarer.mp3')
+<body>
+  <p id="status"></p>
+  <img id="preview" alt="Fluttershy preview">
 
-function musicPlay() {
-faudio.play();
-}
+  <script>
+    var maxWindows = 5;
 
-faudio.addEventListener('timeupdate', function() {
-	console.log('TimeUpdate invoked.');
+    function getOpenWindowCount() {
+      return Number(localStorage.getItem("flutterzOpenWindows") || "0");
+    }
 
-    if (this.currentTime > this.duration - .45) {
+    function setOpenWindowCount(count) {
+      localStorage.setItem("flutterzOpenWindows", String(Math.max(0, count)));
+    }
+
+    function registerThisWindow() {
+      if (!sessionStorage.getItem("flutterzRegistered")) {
+        sessionStorage.setItem("flutterzRegistered", "true");
+        setOpenWindowCount(getOpenWindowCount() + 1);
+      }
+    }
+
+    function unregisterThisWindow() {
+      if (sessionStorage.getItem("flutterzRegistered")) {
+        sessionStorage.removeItem("flutterzRegistered");
+        setOpenWindowCount(getOpenWindowCount() - 1);
+      }
+    }
+
+    document.addEventListener("click", musicPlay);
+
+    var faudio = new Audio("https://archive.org/download/wayfarer-processed-fordemo/wayfarer.mp3");
+
+    function musicPlay() {
+      faudio.play().catch(function(error) {
+        console.log("Audio could not play:", error);
+      });
+    }
+
+    faudio.addEventListener("timeupdate", function() {
+      if (this.currentTime > this.duration - 0.45) {
         this.currentTime = 0;
         this.play();
+      }
+    });
+
+    function bookmark() {
+      if (
+        navigator.appName == "Microsoft Internet Explorer" &&
+        parseInt(navigator.appVersion) >= 4
+      ) {
+        var url = "neigh.html";
+        var title = "Flutterz";
+        window.external.AddFavorite(url, title);
+      }
     }
-}
-);
-/* [Oct 2021] End part. */
 
-function bookmark() {
-	if ((navigator.appName == "Microsoft Internet Explorer") && (parseInt(navigator.appVersion) >= 4)) {
-		var url = "lol.html";
-		var title = "Idiot!";
-		
-		window.external.AddFavorite(url, title);
-	}
-}
+    var xOff = 5;
+    var yOff = 5;
+    var xPos = 400;
+    var yPos = -100;
+    var flagRun = 1;
 
-var xOff = 5;
-var yOff = 5;
-var xPos = 400;
-var yPos = -100;
-var flagRun = 1;
+    function changeTitle(title) {
+      document.title = title;
+    }
 
-function changeTitle(title) {
-	document.title = title;
-}
+    function newXlt() {
+      xOff = Math.ceil(-6 * Math.random()) * 5 - 10;
+      window.focus();
+    }
 
-function openWindow(url) {
-	aWindow = window.open(url, "_blank", 'menubar=no, status=no, toolbar=no, resizable=no, width=357, height=330, titlebar=no, alwaysRaised=yes');
-}
+    function newXrt() {
+      xOff = Math.ceil(7 * Math.random()) * 5 - 10;
+      window.focus();
+    }
 
-function proCreate() {	
-	for (var i = 0; i < 1; i++) {
-		openWindow('lol.html');
-	}
-}
+    function newYup() {
+      yOff = Math.ceil(-6 * Math.random()) * 5 - 10;
+      window.focus();
+    }
 
-function newXlt() {
-	xOff = Math.ceil(-6 * Math.random()) * 5 - 10;
-	window.focus();
-}
+    function newYdn() {
+      yOff = Math.ceil(7 * Math.random()) * 5 - 10;
+      window.focus();
+    }
 
-function newXrt() {
-	xOff = Math.ceil(7 * Math.random())  * 5 - 10;
-	window.focus();
-}
+    function fOff() {
+      flagRun = 0;
+    }
 
-function newYup() {
-	yOff = Math.ceil(-6 * Math.random()) * 5 - 10;
-	window.focus();
-}
+    function playBall() {
+      xPos += xOff;
+      yPos += yOff;
 
-function newYdn() {
-	yOff = Math.ceil( 7 * Math.random()) * 5 - 10;
-	window.focus();
-}
+      if (xPos > screen.width - 357) newXlt();
+      if (xPos < 0) newXrt();
 
-function fOff(){
-	flagRun = 0;
-}
+      if (yPos > screen.height - 330) newYup();
+      if (yPos < 0) newYdn();
 
-function playBall() {/*
-    xPos += xOff;
-    yPos += yOff;
-    
-	if (xPos > screen.width - 357) newXlt();    
-	if (xPos < 0) newXrt();
-    
-	if (yPos > screen.height - 330) newYup(); 		
-	if (yPos < 0) newYdn();
-    
-	if (flagRun == 1) {
+      if (flagRun == 1) {
         window.moveTo(xPos, yPos);
-        setTimeout('playBall()', 1);
-    }*/
-}
+        setTimeout(playBall, 1);
+      }
+    }
 
-/* [Oct 2021] Better code. */
-window.onload = function () {
-	flagRun = 1;
-	
-	playBall();
-	bookmark(); // Internet Explorer only (what a piece of sugar)
-	
-	return true;
-}
+    async function getRandomFluttershyImage() {
+      const query = encodeURIComponent("fluttershy, safe");
+      const url = `https://derpibooru.org/api/v1/json/search/images?q=${query}&sf=random&per_page=3`;
 
-window.onmouseout = function () {
-	proCreate();
+      const response = await fetch(url, {
+        headers: {
+          "Accept": "application/json"
+        }
+      });
 
-	return null;
-};
+      if (!response.ok) {
+        throw new Error(`Derpibooru API error: ${response.status}`);
+      }
 
-window.oncontextmenu = function() {
-	
-	return false;
-}
+      const data = await response.json();
 
-window.onkeydown = function() {	
-	//var keyCode = event.keyCode;
-	var keyCode = e.keyCode;
-	
-	if (keyCode == 17 || keyCode == 18 || keyCode == 46 || keyCode == 115) {	
-    	alert("Flutterz");
-    	alert("Flutterz");
-    	alert("Flutterz");
-    	alert("Flutterz");
-    	alert("Flutterz");
-    	alert("Flutterz");
-    	alert("Flutterz");
-    	alert("Flutterz");
-    	alert("Flutterz");
-    	alert("Flutterz");
-    	alert("Flutterz");
-    	alert("Flutterz");
-    	alert("Flutterz");
-    	alert("Flutterz");
-    	alert("Flutterz");	
-    	alert("Flutterz");
-    	alert("Flutterz");
-    	alert("Flutterz");
-    	alert("Flutterz");
-    	alert("Flutterz");
-    	alert("Flutterz");
-    	alert("Flutterz");
-    	alert("Flutterz");
-    alert("!"); 
-    alert("!"); 
-    alert("!"); 
-    alert("!"); 
-    alert("!"); 
-    alert("!"); 
-    alert("!"); 
-    alert("!"); 
-    alert("!"); 
-    alert("!"); 
-    alert("!"); 
-    alert("!"); 
-    alert("!"); 
-    alert("!"); 
-		proCreate();
-	}
-	
-	return null;
-}
+      if (!data.images || data.images.length === 0) {
+        throw new Error("No images found.");
+      }
 
-window.onbeforeunload = function() {
-    return "Flutterz";
-};
-/* [Oct 2021] End of amendments. */
-</script>
+      const image = data.images[0];
+
+      return image.representations?.large
+        || image.representations?.medium
+        || image.view_url
+        || image.image;
+    }
+
+    async function loadFluttershyImage() {
+      const status = document.getElementById("status");
+      const preview = document.getElementById("preview");
+
+      try {
+        status.textContent = "Loading...";
+
+        const imageUrl = await getRandomFluttershyImage();
+
+        preview.src = imageUrl;
+        status.textContent = "";
+      } catch (error) {
+        status.textContent = error.message;
+        console.error(error);
+      }
+    }
+
+    function openWindow(url) {
+      var currentCount = getOpenWindowCount();
+
+      if (currentCount >= maxWindows) {
+        console.log("Max windows reached:", currentCount);
+        return null;
+      }
+
+      return window.open(
+        url,
+        "_blank",
+        "menubar=no, status=no, toolbar=no, resizable=no, width=357, height=330, titlebar=no"
+      );
+    }
+
+    function proCreate() {
+      for (var i = 0; i < 1; i++) {
+        openWindow("lol.html");
+      }
+    }
+
+    window.onload = function() {
+      registerThisWindow();
+
+      flagRun = 1;
+
+      loadFluttershyImage();
+      playBall();
+      bookmark();
+
+      return true;
+    };
+
+    window.addEventListener("beforeunload", function() {
+      unregisterThisWindow();
+    });
+
+    window.onmouseout = function() {
+      proCreate();
+      return null;
+    };
+
+    window.oncontextmenu = function() {
+      return false;
+    };
+
+    window.onkeydown = function(e) {
+      var keyCode = e.keyCode;
+
+      if (
+        keyCode == 17 ||
+        keyCode == 18 ||
+        keyCode == 46 ||
+        keyCode == 115
+      ) {
+        alert("Flutterz");
+        alert("Flutterz");
+        alert("Flutterz");
+        alert("Flutterz");
+        alert("Flutterz");
+        alert("Flutterz");
+        alert("Flutterz");
+        alert("Flutterz");
+        alert("Flutterz");
+
+        alert("!");
+        alert("!");
+        alert("!");
+        alert("!");
+        alert("!");
+        alert("!");
+        alert("!");
+        alert("!");
+        alert("!");
+        alert("!");
+        alert("!");
+
+        proCreate();
+      }
+
+      return null;
+    };
+
+    window.onbeforeunload = function() {
+      return "Flutterz";
+    };
+  </script>
+</body>
 </html>
