@@ -38,7 +38,6 @@
   <img id="preview" alt="Fluttershy preview">
 
   <script>
-    var maxWindows = 5;
 
     function getOpenWindowCount() {
       return Number(localStorage.getItem("flutterzOpenWindows") || "0");
@@ -187,11 +186,6 @@
 
     function openWindow(url) {
       var currentCount = getOpenWindowCount();
-
-      if (currentCount >= maxWindows) {
-        console.log("Max windows reached:", currentCount);
-        return null;
-      }
 
       return window.open(
         url,
